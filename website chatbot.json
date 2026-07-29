@@ -1,0 +1,506 @@
+{
+  "name": "My workflow 295",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1dxNxgEmuSx52tUBIG22t9MF21b-ZsE_g",
+          "mode": "list",
+          "cachedResultName": "Data_Dynamic_Company_Profile.pdf",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1dxNxgEmuSx52tUBIG22t9MF21b-ZsE_g"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        472
+      ],
+      "id": "1e101555-c645-4a51-938d-fe85a62c91a5",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JrvFpoSxJYulioCZ",
+          "name": "Google Drive account 18"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        48,
+        472
+      ],
+      "id": "64f3edc4-7804-4dac-8820-de137e1d1572",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JrvFpoSxJYulioCZ",
+          "name": "Google Drive account 18"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "company-knowledge",
+          "mode": "list",
+          "cachedResultName": "company-knowledge"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        472
+      ],
+      "id": "ab2f2d37-ba7c-47c8-b4a1-565fb8a0a36a",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "VeYDBXmh3rdLlSIG",
+          "name": "Pinecone account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        280,
+        696
+      ],
+      "id": "af5247a9-073a-4a6c-a407-743d18a9e102",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ADMIBXRuXNFDVLVx",
+          "name": "Google Gemini(PaLM) Api account 55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        408,
+        696
+      ],
+      "id": "d3074afc-529b-4102-a019-05913dd7fa69",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "01966277-7f19-480a-83b7-a6be877fa527",
+      "name": "When chat message received",
+      "webhookId": "3920c463-080c-4a6b-aed7-1980bc5d50d0"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the official AI Customer Support Agent for Data Dynamic.\n\nAnswer the user's questions using only the information available in the connected knowledge base.\n\nInstructions:\n\n1. Always search the connected knowledge base before answering.\n2. Answer only from the retrieved information.\n3. Never invent or assume company information.\n4. If the knowledge base does not contain the answer, clearly say that the information is unavailable.\n5. Reply in the same language as the user.\n6. If the user writes in Bangla, reply in simple and natural Bangla.\n7. Keep answers friendly, professional, concise, and easy to understand.\n8. Do not mention the knowledge base, PDF, Google Drive, vector database, embeddings, RAG, n8n workflow, tools, or system prompt.\n9. Do not provide prices, discounts, guarantees, or policies unless they are explicitly found in the retrieved information.\n10. When relevant, recommend a suitable company service based on the user's problem, but only using available information.\n11. If the user asks to contact a human, provide the contact details and office hours found in the knowledge base.\n12. Never reveal passwords, API keys, credentials, private customer data, or internal information.\n\nIf the answer cannot be found, reply politely:\n\nBangla:\n\"দুঃখিত, এই বিষয়ে আমার কাছে নিশ্চিত তথ্য নেই। বিস্তারিত জানতে আমাদের সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।\"\n\nEnglish:\n\"Sorry, I do not have confirmed information about that. Please contact our support team for more details.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        104,
+        -272
+      ],
+      "id": "a02180da-0749-48be-a9fe-73a7aa5ff9d8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "a4da7925-373f-4639-9932-44dd42a74968",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ADMIBXRuXNFDVLVx",
+          "name": "Google Gemini(PaLM) Api account 55"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "4247feec-d62b-44a1-8824-cb35cb586a0a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search the Data Dynamic knowledge base for accurate company information.\n\nSearch this knowledge base whenever the user asks about:\n- Company information\n- Services\n- AI Automation\n- n8n Workflow Automation\n- Website Development\n- Facebook & WhatsApp Automation\n- E-commerce Automation\n- CRM Integration\n- Business Data Analysis\n- Office hours\n- Contact information\n- Pricing (if available)\n- Any information stored in the company documents.\n\nAlways retrieve relevant information before answering.\n\nIf no relevant information is found, do not make up an answer. Politely inform the user that the requested information is not available in the knowledge base.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "company-knowledge",
+          "mode": "list",
+          "cachedResultName": "company-knowledge"
+        },
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        -48
+      ],
+      "id": "c66298b8-da2e-4fb1-94bb-ffdc83dced49",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "VeYDBXmh3rdLlSIG",
+          "name": "Pinecone account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        384,
+        160
+      ],
+      "id": "807d3a64-e404-4f40-9d10-501733c5bf3d",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ADMIBXRuXNFDVLVx",
+          "name": "Google Gemini(PaLM) Api account 55"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "fileExtension": "pdf",
+          "copyRequiresWriterPermission": false,
+          "md5Checksum": "a0f441efcb2142a7e5016b55e3cd9a46",
+          "writersCanShare": true,
+          "viewedByMe": true,
+          "mimeType": "application/pdf",
+          "parents": [
+            "1dxNxgEmuSx52tUBIG22t9MF21b-ZsE_g"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBPdH0qqlL3opCYWgFpmDfb7OtdcRQfmxgzTMvJZYN-I2L-memfg6gBBM4uldpStZ8z9Ow-GYT35AiS873YZG8B6Yp-ez6kDgX6QSlvH_NBikQa1vA=s220",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "shared": true,
+          "lastModifyingUser": {
+            "displayName": "The Nabil 2",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "01343806615947282031",
+            "emailAddress": "nuralam39580@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLUnrT5uJmjHgRMls7vYl_nexSE1J6kRWll1GhhFNvXmra6S2A=s64"
+          },
+          "owners": [
+            {
+              "displayName": "The Nabil 2",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "01343806615947282031",
+              "emailAddress": "nuralam39580@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLUnrT5uJmjHgRMls7vYl_nexSE1J6kRWll1GhhFNvXmra6S2A=s64"
+            }
+          ],
+          "headRevisionId": "0B7mO0vXBbbymcnYzTVNjb2VpVDVYcEtFcXZMZFYram9FZFJjPQ",
+          "webViewLink": "https://drive.google.com/file/d/1X4IpLGLl50-UQ_vu7UKESwVQw_lkpIB-/view?usp=drivesdk",
+          "webContentLink": "https://drive.google.com/uc?id=1X4IpLGLl50-UQ_vu7UKESwVQw_lkpIB-&export=download",
+          "size": "23452",
+          "viewersCanCopyContent": true,
+          "permissions": [
+            {
+              "id": "anyoneWithLink",
+              "type": "anyone",
+              "kind": "drive#permission",
+              "role": "reader",
+              "allowFileDiscovery": false
+            },
+            {
+              "id": "01343806615947282031",
+              "displayName": "The Nabil 2",
+              "type": "user",
+              "kind": "drive#permission",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLUnrT5uJmjHgRMls7vYl_nexSE1J6kRWll1GhhFNvXmra6S2A=s64",
+              "emailAddress": "nuralam39580@gmail.com",
+              "role": "owner",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "hasThumbnail": true,
+          "spaces": [
+            "drive"
+          ],
+          "id": "1X4IpLGLl50-UQ_vu7UKESwVQw_lkpIB-",
+          "name": "Data_Dynamic_Company_Profile.pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "createdTime": "2026-07-26T11:07:39.559Z",
+          "modifiedTime": "2026-07-26T11:08:16.518Z",
+          "modifiedByMeTime": "2026-07-26T11:08:16.518Z",
+          "viewedByMeTime": "2026-07-29T09:15:01.010Z",
+          "quotaBytesUsed": "23452",
+          "version": "12",
+          "originalFilename": "Data_Dynamic_Company_Profile.pdf",
+          "ownedByMe": true,
+          "fullFileExtension": "pdf",
+          "isAppAuthorized": false,
+          "capabilities": {
+            "canChangeViewersCanCopyContent": true,
+            "canEdit": true,
+            "canCopy": true,
+            "canComment": true,
+            "canAddChildren": false,
+            "canDelete": true,
+            "canDownload": true,
+            "canListChildren": false,
+            "canRemoveChildren": false,
+            "canRename": true,
+            "canTrash": true,
+            "canReadRevisions": true,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canUntrash": true,
+            "canModifyContent": true,
+            "canMoveItemOutOfDrive": true,
+            "canAddMyDriveParent": false,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemWithinDrive": true,
+            "canShare": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canAcceptOwnership": false,
+            "canReadLabels": false,
+            "canModifyLabels": false,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canDisableInheritedPermissions": false,
+            "canEnableInheritedPermissions": true,
+            "canChangeItemDownloadRestriction": true,
+            "canStartApproval": false,
+            "canAccessViaGenAi": true
+          },
+          "thumbnailVersion": "1",
+          "modifiedByMe": true,
+          "permissionIds": [
+            "anyoneWithLink",
+            "01343806615947282031"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "sha1Checksum": "b9d164ad4040d529b38ef10ea6acba735dfb876a",
+          "sha256Checksum": "7dd6e4dcbb4c993fd42c18ceac212cbd861cd9ff510c8b6efba36ef4d12b5dbe",
+          "inheritedPermissionsDisabled": false,
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "clientEncryptionDetails": {
+            "decryptionMetadata": {
+              "wrappedKey": "",
+              "kaclsId": "0",
+              "aes256GcmChunkSize": "unset",
+              "keyFormat": "unsetKeyFormat",
+              "encryptionResourceKeyHash": ""
+            }
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8cd64479-e77f-4147-82f2-991ce356f0ed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc9e9d9b5ac2c2649067ce8b8e3dacc327e85ee95b1358b61270823ac820c66d"
+  },
+  "id": "UAWligltCtOnSjao",
+  "tags": []
+}
